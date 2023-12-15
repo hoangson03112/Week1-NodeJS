@@ -1,5 +1,5 @@
 const writeFile = require("./function/writeFile");
-const {fetchData,getPostWithCommentsById} = require("./function/fetchData");
+const { fetchData, getPostWithCommentsById } = require("./function/fetchData");
 async function fetchDataFromMultipleAPIs() {
   try {
     //Get data from all users from API
@@ -77,7 +77,6 @@ async function fetchDataFromMultipleAPIs() {
     const [getPostById, getCommentByPostId] = await getPostWithCommentsById(6);
     getPostById.comments = getCommentByPostId;
     writeFile("data/getPostById.json", getPostById);
-    
   } catch (error) {
     console.log(error);
   }
