@@ -1,5 +1,5 @@
 const writeFile = require("./function/writeFile");
-const fetchData = require("./function/fetchData");
+const {fetchData,getPostWithCommentsById} = require("./function/fetchData");
 async function fetchDataFromMultipleAPIs() {
   try {
     //Get data from all users from API
@@ -44,7 +44,7 @@ async function fetchDataFromMultipleAPIs() {
     });
     writeFile("data/reformatDataWithCount.json", reformatDataWithCount);
 
-    let maxValue = -Infinity;
+    let maxValue = -1;
     let userMostPost;
     let userMostComment;
 
@@ -58,7 +58,7 @@ async function fetchDataFromMultipleAPIs() {
     writeFile("data/userMostPost.json", userMostPost);
 
     //User with the most comment
-    maxValue = -Infinity;
+    maxValue = -1;
     reformatDataWithCount.forEach((user) => {
       if (user.commentsCount > maxValue) {
         maxValue = user.commentsCount;
@@ -74,12 +74,9 @@ async function fetchDataFromMultipleAPIs() {
     writeFile("data/listUserDescending.json", reformatDataWithCount);
 
     //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
-    const [getPostId1, getCommentPostId1] = await Promise.all([
-      fetchData(`https://jsonplaceholder.typicode.com/posts/1`),
-      fetchData(`https://jsonplaceholder.typicode.com/comments?postId=1`)
-    ]);
-    getPostId1.comments = getCommentPostId1;
-    writeFile("data/getPostId1.json", getPostId1);
+    const [getPostById, getCommentByPostId] = await getPostWithCommentsById(6);
+    getPostById.comments = getCommentByPostId;
+    writeFile("data/getPostById.json", getPostById);
     
   } catch (error) {
     console.log(error);
