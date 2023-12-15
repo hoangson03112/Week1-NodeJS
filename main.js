@@ -5,7 +5,7 @@ async function fetchDataFromMultipleAPIs() {
     const response = await fetch("https://jsonplaceholder.typicode.com/users");
     const dataUsser = await response.json();
     console.log("Data 10 user:", dataUsser);
-    fs.writeFileSync('Data10User.json', JSON.stringify(dataUsser), 'utf-8');
+    fs.writeFileSync('data/Data10User.json', JSON.stringify(dataUsser), 'utf-8');
     // Get all the posts and comments from the API
     const [dataPost, dataComment] = await Promise.all([
       fetch(`https://jsonplaceholder.typicode.com/posts`).then((response) =>
@@ -16,10 +16,10 @@ async function fetchDataFromMultipleAPIs() {
       ),
     ]);
     console.log("Data posts:", dataPost);
-    fs.writeFileSync('DataPosts.json', JSON.stringify(dataPost), 'utf-8');
+    fs.writeFileSync('data/DataPosts.json', JSON.stringify(dataPost), 'utf-8');
 
     console.log("Data comments:", dataComment);
-    fs.writeFileSync('DataComments.json', JSON.stringify(dataComment), 'utf-8');
+    fs.writeFileSync('data/DataComments.json', JSON.stringify(dataComment), 'utf-8');
 
     //----------------------------------------------------------------
     const newListUser = dataUsser.map((user) => {
@@ -80,7 +80,7 @@ async function fetchDataFromMultipleAPIs() {
                 post: user.post,
               };
             })
-    fs.writeFileSync('dataMapPostAndComment.json', JSON.stringify(dataMapPostAndComment), 'utf-8');
+    fs.writeFileSync('data/dataMapPostAndComment.json', JSON.stringify(dataMapPostAndComment), 'utf-8');
           
           //Users with more than 3 comments
           
@@ -88,7 +88,7 @@ async function fetchDataFromMultipleAPIs() {
             newListUser.filter((user) => {
               return user.commentsCount > 3;
             })
-    fs.writeFileSync('dataUserMoreThan3Cm.json', JSON.stringify(dataUserMoreThan3Cm), 'utf-8');
+    fs.writeFileSync('data/dataUserMoreThan3Cm.json', JSON.stringify(dataUserMoreThan3Cm), 'utf-8');
         
           const reformatDataWithCount=
             newListUser.map((user) => {
@@ -101,7 +101,7 @@ async function fetchDataFromMultipleAPIs() {
                 postsCount: user.postsCount,
               };
             })
-    fs.writeFileSync('reformatDataWithCount.json', JSON.stringify(reformatDataWithCount), 'utf-8');
+    fs.writeFileSync('data/reformatDataWithCount.json', JSON.stringify(reformatDataWithCount), 'utf-8');
           
           let maxValue = -Infinity;
           let userMostPost;
@@ -114,8 +114,8 @@ async function fetchDataFromMultipleAPIs() {
               userMostPost = user;
             }
           });
-          console.log("User with the most post: ", userMostPost);
-    fs.writeFileSync('userMostPost.json', JSON.stringify(userMostPost), 'utf-8');
+       
+    fs.writeFileSync('data/userMostPost.json', JSON.stringify(userMostPost), 'utf-8');
 
           //User with the most comment
           maxValue = -Infinity;
@@ -125,15 +125,15 @@ async function fetchDataFromMultipleAPIs() {
               userMostComment = user;
             }
           });
-          console.log("User with the most comment: ", userMostComment);
-    fs.writeFileSync('userMostComment.json', JSON.stringify(userMostComment), 'utf-8');
+        
+    fs.writeFileSync('data/userMostComment.json', JSON.stringify(userMostComment), 'utf-8');
 
           //The postsCount value descending
           newListUser.sort((userPrev, userNext) => {
             return userNext.postsCount - userPrev.postsCount;
           });
-          console.log("The postsCount value descending ", newListUser);
-    fs.writeFileSync('newListUser.json', JSON.stringify(newListUser), 'utf-8');
+        
+    fs.writeFileSync('data/newListUser.json', JSON.stringify(newListUser), 'utf-8');
           
 
           //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
@@ -146,8 +146,8 @@ async function fetchDataFromMultipleAPIs() {
             ).then((response) => response.json()),
           ]);
           getPostId1.comments = getCommentPostId1;
-          console.log("Merge the post data:", getPostId1);
-    fs.writeFileSync('getPostId1.json', JSON.stringify(getPostId1), 'utf-8');
+         
+    fs.writeFileSync('data/getPostId1.json', JSON.stringify(getPostId1), 'utf-8');
 
         }
       }
