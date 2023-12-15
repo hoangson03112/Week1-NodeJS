@@ -1,158 +1,86 @@
-const fs= require('fs');
+const writeFile = require("./function/writeFile");
+const fetchData = require("./function/fetchData");
 async function fetchDataFromMultipleAPIs() {
   try {
     //Get data from all users from API
-    const response = await fetch("https://jsonplaceholder.typicode.com/users");
-    const dataUsser = await response.json();
-    console.log("Data 10 user:", dataUsser);
-    fs.writeFileSync('data/Data10User.json', JSON.stringify(dataUsser), 'utf-8');
+    const dataUsser = await fetchData(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    writeFile("data/Data10User.json", dataUsser);
     // Get all the posts and comments from the API
     const [dataPost, dataComment] = await Promise.all([
-      fetch(`https://jsonplaceholder.typicode.com/posts`).then((response) =>
-        response.json()
-      ),
-      fetch(`https://jsonplaceholder.typicode.com/comments`).then((response) =>
-        response.json()
-      ),
+      fetchData(`https://jsonplaceholder.typicode.com/posts`),
+      fetchData(`https://jsonplaceholder.typicode.com/comments`),
     ]);
-    console.log("Data posts:", dataPost);
-    fs.writeFileSync('data/DataPosts.json', JSON.stringify(dataPost), 'utf-8');
+    writeFile("data/DataPosts.json", dataPost);
+    writeFile("data/DataComments.json", dataComment);
 
-    console.log("Data comments:", dataComment);
-    fs.writeFileSync('data/DataComments.json', JSON.stringify(dataComment), 'utf-8');
+    const dataUsersMapWithPostsComments = dataUsser.map((user) => {
+      const { address, company, ...newUser } = user;
 
-    //----------------------------------------------------------------
-    const newListUser = dataUsser.map((user) => {
       return {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
+        ...newUser,
+        comments: dataComment.filter((comment) => comment.email === user.email),
+        posts: dataPost.filter((post) => post.userId === user.id),
       };
-    }); 
-//---------------------------------------------------------------
-    for (const user of newListUser) {
-      async function fetchData() {
-        const [getPostByUserId, getCommentByEmail] = await Promise.all([
-          fetch(
-            `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
-          ).then((response) => response.json()),
-          fetch(
-            `https://jsonplaceholder.typicode.com/comments?email=${user.email}`
-          ).then((response) => response.json()),
-        ]);
+    });
+    writeFile(
+      "data/dataUsersMapWithPAndCm.json",
+      dataUsersMapWithPostsComments
+    );
 
-        //map listComment
-        const listComment = getCommentByEmail.map((comment) => {
-          return {
-            id: comment.id,
-            postId: comment.postId,
-            name: comment.name,
-            body: comment.body,
-          };
-        });
+    const dataUserMoreThan3Cm = dataUsersMapWithPostsComments.filter((user) => {
+      return user.comments.length > 3;
+    });
+    writeFile("data/dataUserMoreThan3Cm.json", dataUserMoreThan3Cm);
 
-        user.comment = listComment;
-        //Map listPost
-        const listPost = getPostByUserId.map((post) => {
-          return {
-            id: post.id,
-            title: post.title,
-            body: post.body,
-          };
-        });
-        user.post = listPost;
+    const reformatDataWithCount = dataUsersMapWithPostsComments.map((user) => {
+      const { comments, posts, ...rest } = user;
+      return {
+        ...rest,
+        commentsCount: user.comments.length,
+        postsCount: user.posts.length,
+      };
+    });
+    writeFile("data/reformatDataWithCount.json", reformatDataWithCount);
 
-        //add countPost và countComment
-        user.postsCount = user.post.length;
-        user.commentsCount = user.comment.length;
+    let maxValue = -Infinity;
+    let userMostPost;
+    let userMostComment;
 
-        //Executed when posts, comments,postCount,commentCount have been added for all users
-        if (user.id === newListUser.length) {
-            const dataMapPostAndComment=
-            newListUser.map((user) => {
-              return {
-                id: user.id,
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                comment: user.comment,
-                post: user.post,
-              };
-            })
-    fs.writeFileSync('data/dataMapPostAndComment.json', JSON.stringify(dataMapPostAndComment), 'utf-8');
-          
-          //Users with more than 3 comments
-          
-            const dataUserMoreThan3Cm=
-            newListUser.filter((user) => {
-              return user.commentsCount > 3;
-            })
-    fs.writeFileSync('data/dataUserMoreThan3Cm.json', JSON.stringify(dataUserMoreThan3Cm), 'utf-8');
-        
-          const reformatDataWithCount=
-            newListUser.map((user) => {
-              return {
-                id: user.id,
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                commentsCount: user.commentsCount,
-                postsCount: user.postsCount,
-              };
-            })
-    fs.writeFileSync('data/reformatDataWithCount.json', JSON.stringify(reformatDataWithCount), 'utf-8');
-          
-          let maxValue = -Infinity;
-          let userMostPost;
-          let userMostComment;
-
-          // User with the most post
-          newListUser.forEach((user) => {
-            if (user.postsCount > maxValue) {
-              maxValue = user.postsCount;
-              userMostPost = user;
-            }
-          });
-       
-    fs.writeFileSync('data/userMostPost.json', JSON.stringify(userMostPost), 'utf-8');
-
-          //User with the most comment
-          maxValue = -Infinity;
-          newListUser.forEach((user) => {
-            if (user.commentsCount > maxValue) {
-              maxValue = user.commentsCount;
-              userMostComment = user;
-            }
-          });
-        
-    fs.writeFileSync('data/userMostComment.json', JSON.stringify(userMostComment), 'utf-8');
-
-          //The postsCount value descending
-          newListUser.sort((userPrev, userNext) => {
-            return userNext.postsCount - userPrev.postsCount;
-          });
-        
-    fs.writeFileSync('data/newListUser.json', JSON.stringify(newListUser), 'utf-8');
-          
-
-          //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
-          const [getPostId1, getCommentPostId1] = await Promise.all([
-            fetch(`https://jsonplaceholder.typicode.com/posts/1`).then(
-              (response) => response.json()
-            ),
-            fetch(
-              `https://jsonplaceholder.typicode.com/comments?postId=1`
-            ).then((response) => response.json()),
-          ]);
-          getPostId1.comments = getCommentPostId1;
-         
-    fs.writeFileSync('data/getPostId1.json', JSON.stringify(getPostId1), 'utf-8');
-
-        }
+    // User with the most post
+    reformatDataWithCount.forEach((user) => {
+      if (user.postsCount > maxValue) {
+        maxValue = user.postsCount;
+        userMostPost = user;
       }
-      fetchData();
-    }
+    });
+    writeFile("data/userMostPost.json", userMostPost);
+
+    //User with the most comment
+    maxValue = -Infinity;
+    reformatDataWithCount.forEach((user) => {
+      if (user.commentsCount > maxValue) {
+        maxValue = user.commentsCount;
+        userMostComment = user;
+      }
+    });
+    writeFile("data/userMostComment.json", userMostComment);
+
+    // The postsCount value descending
+    reformatDataWithCount.sort((userPrev, userNext) => {
+      return userNext.postsCount - userPrev.postsCount;
+    });
+    writeFile("data/listUserDescending.json", reformatDataWithCount);
+
+    //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
+    const [getPostId1, getCommentPostId1] = await Promise.all([
+      fetchData(`https://jsonplaceholder.typicode.com/posts/1`),
+      fetchData(`https://jsonplaceholder.typicode.com/comments?postId=1`)
+    ]);
+    getPostId1.comments = getCommentPostId1;
+    writeFile("data/getPostId1.json", getPostId1);
+    
   } catch (error) {
     console.log(error);
   }
