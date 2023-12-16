@@ -1,5 +1,5 @@
 const writeFile = require("./function/writeFile");
-const { fetchData, getPostWithCommentsById } = require("./function/fetchData");
+const { fetchData,getPostAndCommentsById} = require("./function/fetchData");
 async function fetchDataFromMultipleAPIs() {
   try {
     //Get data from all users from API
@@ -73,8 +73,10 @@ async function fetchDataFromMultipleAPIs() {
     });
     writeFile("data/listUserDescending.json", reformatDataWithCount);
 
+   
+    const getPostWithCommentsById = await getPostAndCommentsById(8);
     //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
-    writeFile("data/getPostById.json", await getPostWithCommentsById(1));
+    writeFile("data/getPostById.json",getPostWithCommentsById);
   } catch (error) {
     console.log(error);
   }

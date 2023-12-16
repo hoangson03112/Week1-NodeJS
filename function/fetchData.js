@@ -3,8 +3,8 @@ const fetchData = async (url) => {
   return response.json();
 };
 
-const getPostWithCommentsById = (id) => {
-  const [post, comment] = Promise.all([
+const getPostAndCommentsById =async (id) => {
+  const [post, comment] =await Promise.all([
     fetchData("https://jsonplaceholder.typicode.com/posts/"+`${id}`),
     fetchData(
       "https://jsonplaceholder.typicode.com/comments?postId="+`${id}`
@@ -16,4 +16,4 @@ const getPostWithCommentsById = (id) => {
     comments: comment,
   };
 };
-module.exports = { fetchData, getPostWithCommentsById };
+module.exports = { fetchData, getPostAndCommentsById };
