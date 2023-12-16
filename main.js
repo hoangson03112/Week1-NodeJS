@@ -74,9 +74,7 @@ async function fetchDataFromMultipleAPIs() {
     writeFile("data/listUserDescending.json", reformatDataWithCount);
 
     //Get the post with ID of 1 via API request, at the same time get comments for post ID of 1 via another API request
-    const [getPostById, getCommentByPostId] = await getPostWithCommentsById(6);
-    getPostById.comments = getCommentByPostId;
-    writeFile("data/getPostById.json", getPostById);
+    writeFile("data/getPostById.json", await getPostWithCommentsById(1));
   } catch (error) {
     console.log(error);
   }
